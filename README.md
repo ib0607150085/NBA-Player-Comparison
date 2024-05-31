@@ -1,2 +1,8 @@
-# NBA-Player-Comparison
-This is a personal project meant to incorporate elements of data engineering and software engineering. This project will involve a full-stack development, by using react to compare  NBA players, the construction of a sql server to store data, and a python script to scrape data from an existing web api.
+# React + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
