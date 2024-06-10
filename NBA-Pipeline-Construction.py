@@ -10,3 +10,4 @@ import pyodbc
 
 
 print("Hello World!")
+print("hello")
