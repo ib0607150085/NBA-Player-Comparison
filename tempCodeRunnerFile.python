@@ -1,0 +1,13 @@
+# Add player names to the DataFrame
+all_player_stats['PLAYER_NAME'] = all_player_stats['PLAYER_ID'].apply(get_player_name)
+
+# Reorder columns to move PLAYER_NAME to the front
+columns = ['PLAYER_NAME'] + [col for col in all_player_stats.columns if col != 'PLAYER_NAME']
+all_player_stats = all_player_stats[columns]
+
+# Display the updated DataFrame
+print("Updated DataFrame with PLAYER_NAME at the front:")
+print(all_player_stats)
+
+# Save the updated DataFrame to a new CSV file
+all_player_stats.to_csv("nba_stats_with_names.csv", index=False)

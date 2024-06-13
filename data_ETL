@@ -1,0 +1,64 @@
+import pandas as pd
+import time
+from nba_api.stats.endpoints import commonplayerinfo
+from requests.exceptions import ReadTimeout, ConnectionError
+
+# Load the existing player stats DataFrame
+all_player_stats = pd.read_csv("nba_player_stats_intermediate.csv")
+print(all_player_stats.head())
+
+# Dictionary to store player names to avoid multiple API calls
+player_names_cache = {}
+
+def get_player_name(player_id, retries=5, backoff_factor=1.5):
+    if player_id in player_names_cache:
+        return player_names_cache[player_id]
+    
+    for i in range(retries):
+        try:
+            print(f"Fetching name for player_id {player_id}, attempt {i + 1}")
+            player_info = commonplayerinfo.CommonPlayerInfo(player_id=player_id, timeout=60)
+            player_data = player_info.get_data_frames()[0]
+            player_name = player_data.loc[0, 'DISPLAY_FIRST_LAST']
+            player_names_cache[player_id] = player_name
+            return player_name
+        except (ReadTimeout, ConnectionError) as e:
+            print(f"Attempt {i + 1} failed for player_id {player_id}: {e}")
+            time.sleep(backoff_factor ** i)  # Exponential backoff
+        except KeyError:
+            print(f"KeyError: 'DISPLAY_FIRST_LAST' not found for player_id {player_id}")
+            return None
+        except Exception as e:
+            print(f"An error occurred for player_id {player_id}: {e}")
+            return None
+    return None
+
+# Add player names to the DataFrame
+all_player_stats['PLAYER_NAME'] = all_player_stats['PLAYER_ID'].apply(get_player_name)
+
+# Reorder columns to move PLAYER_NAME to the front
+columns = ['PLAYER_NAME'] + [col for col in all_player_stats.columns if col != 'PLAYER_NAME']
+all_player_stats = all_player_stats[columns]
+
+# Display the updated DataFrame
+print("Updated DataFrame with PLAYER_NAME at the front:")
+print(all_player_stats)
+
+# Save the updated DataFrame to a new CSV file
+all_player_stats.to_csv("nba_stats_with_names.csv", index=False)
+
+
+'''
+
+def get_player_name(player_id):
+    player_info = playercareerstats.PlayerCareerStats(player_id=player_id)
+    player_info.get_data_frames()[]
+    player_data = player_info.get_data_frames()[0]
+
+# Add player names to DataFrame
+all_player_stats['PLAYER_NAME'] = all_player_stats['PLAYER_ID'].apply(get_player_name)
+
+# Display the updated DataFrame
+print(all_player_stats.head)
+
+'''

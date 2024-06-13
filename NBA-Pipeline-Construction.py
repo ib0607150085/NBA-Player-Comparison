@@ -18,17 +18,15 @@ from requests.exceptions import RequestException
 all_players = players.get_players()
 all_players_df = pd.DataFrame(all_players)
 
-def get_player_stats(player_id, retries=5, backoff_factor=1.5):
-    delay = 5
+def get_player_stats(player_id, retries=3):
     for attempt in range(retries):
         try:
             career = playercareerstats.PlayerCareerStats(player_id=player_id)
             return career.get_data_frames()[0]
-        except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError, RequestException) as e:
+        except requests.exceptions.ReadTimeout:
             if attempt < retries - 1:
-                print(f"Error for player ID {player_id}: {e}. Retrying in {delay} seconds...")
-                time.sleep(delay)
-                delay *= backoff_factor  # Increase delay for next retry
+                print(f"Timeout for player ID {player_id}. Retrying...")
+                time.sleep(5)  # Wait before retrying
             else:
                 print(f"Failed to retrieve data for player ID {player_id} after {retries} attempts.")
                 return pd.DataFrame()  # Return an empty DataFrame on failure
@@ -48,3 +46,7 @@ for start in range(0, len(all_players_df), batch_size):
     # Save intermediate results to CSV (optional)
     all_player_stats.to_csv('nba_player_stats_intermediate.csv', index=False)
     print(f"Processed players {start} to {end}")
+
+# Move the PLAYER_NAME column to the front
+columns = ['PLAYER_NAME'] + [col for col in all_player_stats.columns if col != 'PLAYER_NAME']
+all_player_stats = all_player_stats[columns]
